@@ -20,6 +20,11 @@ return {
           ['\\'] = 'close_window',
         },
       },
+      filtered_items = {
+        visible = true, -- Makes filtered items visible but dimmed
+        hide_dotfiles = false, -- Set to false to show hidden files by default
+        hide_gitignored = false, -- Set to false if you also want to see gitignored files
+      },
     },
   },
 }

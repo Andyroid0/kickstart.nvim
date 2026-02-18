@@ -388,7 +388,11 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      {
+        'nvim-tree/nvim-web-devicons',
+        options = {},
+        enabled = vim.g.have_nerd_font,
+      },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -1041,6 +1045,52 @@ require('lazy').setup({
       }
     end,
   },
+  {
+    'folke/snacks.nvim',
+    ---@type snacks.Config
+    opts = {
+      image = {
+        -- your image configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      },
+      git = {
+        width = 0.6,
+        height = 0.6,
+        border = true,
+        title = ' Git Blame ',
+        title_pos = 'center',
+        ft = 'git',
+      },
+    },
+    {
+      'NeogitOrg/neogit',
+      lazy = true,
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        'sindrets/diffview.nvim',
+
+        -- Only one of these is needed.
+        'nvim-telescope/telescope.nvim',
+        'folke/snacks.nvim',
+      },
+      cmd = 'Neogit',
+      keys = {
+        { '<leader>gg', '<cmd>Neogit<cr>', desc = 'Show Neogit UI' },
+      },
+    },
+    {
+      'oribarilan/lensline.nvim',
+      tag = '2.0.0', -- or: branch = 'release/2.x' for latest non-breaking updates
+      event = 'LspAttach',
+      config = function()
+        require('lensline').setup()
+      end,
+    },
+    {
+      'rktjmp/playtime.nvim',
+    },
+  },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -1050,7 +1100,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',

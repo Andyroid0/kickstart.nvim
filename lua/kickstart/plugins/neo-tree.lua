@@ -9,6 +9,7 @@ return {
     'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
     'MunifTanjim/nui.nvim',
   },
+  enable_git_status = true,
   lazy = false,
   keys = {
     { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
@@ -25,6 +26,10 @@ return {
         hide_dotfiles = false, -- Set to false to show hidden files by default
         hide_gitignored = false, -- Set to false if you also want to see gitignored files
       },
+    },
+    source_selector = {
+      winbar = true,
+      statusline = false,
     },
   },
 }

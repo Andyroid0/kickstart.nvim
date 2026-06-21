@@ -93,6 +93,12 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+vim.filetype.add {
+  extension = {
+    moon = 'moonscript', -- Maps any *.foo file to the 'foobar' filetype
+  },
+}
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -413,6 +419,16 @@ require('lazy').setup({
       -- This opens a window that shows you all of the keymaps for the current
       -- Telescope picker. This is really useful to discover what Telescope can
       -- do as well as how to actually do it!
+
+      require('nvim-web-devicons').setup {
+        override_by_extension = {
+          moon = {
+            icon = '🌙',
+            color = '#caaff0',
+            name = 'moonscript',
+          },
+        },
+      }
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
@@ -1025,6 +1041,10 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+  {
+    'leafo/moonscript-vim',
+    ft = 'moonscript',
   },
   {
     'apple/pkl-neovim',

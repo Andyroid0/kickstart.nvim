@@ -725,7 +725,6 @@ require('lazy').setup({
               completion = {
                 callSnippet = 'Replace',
               },
-
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- diagnostics = { disable = { 'missing-fields' } },
             },
@@ -811,7 +810,8 @@ require('lazy').setup({
         javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         css = { 'prettier' },
         html = { 'prettier' },
-        json = { 'prettier' },
+        json = { 'prettier', 'jq', stop_after_first = true },
+        jsonc = { 'prettier' },
       },
     },
   },
@@ -1041,10 +1041,6 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-  },
-  {
-    'leafo/moonscript-vim',
-    ft = 'moonscript',
   },
   {
     'apple/pkl-neovim',

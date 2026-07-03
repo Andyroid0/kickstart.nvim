@@ -702,6 +702,10 @@ require('lazy').setup({
       local servers = {
         clangd = {},
         gopls = {},
+        -- NOTE: C3 is configured separately below via `vim.lsp.config('c3_lsp', ...)`.
+        -- (It is intentionally NOT listed here: in mason-lspconfig v2 the `servers`
+        -- table no longer drives setup, and the wrong name `c3lsp` made
+        -- mason-tool-installer throw "Cannot find package c3lsp".)
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -766,6 +770,54 @@ require('lazy').setup({
           end,
         },
       }
+
+      -- ╔══════════════════════════════════════════════════════════════════════╗
+      -- ║ TEMPORARY c3-lsp OVERRIDE — DELETE THIS ENTIRE BLOCK once upstream is  ║
+      -- ║ fixed and Mason ships a C3 0.8.x-aware c3-lsp.                         ║
+      -- ║                                                                        ║
+      -- ║ Why: the released c3-lsp that Mason installs predates C3 0.8.x. It     ║
+      -- ║ can't parse `constdef`, so it drops EVERY symbol after the first one   ║
+      -- ║ in a file — e.g. all raylib functions vanish, leaving only the color   ║
+      -- ║ constants. This points `c3_lsp` at a locally-built binary that fixes   ║
+      -- ║ `alias`/`constdef` (built from ~/repositories/c3-lsp).                 ║
+      -- ║                                                                        ║
+      -- ║ Note (mason-lspconfig v2): the `servers` table above no longer starts  ║
+      -- ║ servers; installed servers are auto-enabled via vim.lsp.enable(). We   ║
+      -- ║ override the shared `c3_lsp` config here so whoever enables it uses     ║
+      -- ║ our binary. The `c3_lsp` server name and its filetypes/root markers    ║
+      -- ║ come from nvim-lspconfig's built-in lsp/c3_lsp.lua; we replace `cmd`.   ║
+      -- ║                                                                        ║
+      -- ║ TO REVERT: delete this whole block. Mason's (fixed) c3-lsp will be      ║
+      -- ║ auto-enabled again. Rebuild the local binary after pulling changes:    ║
+      -- ║   cd ~/repositories/c3-lsp && make build                               ║
+      -- ╚══════════════════════════════════════════════════════════════════════╝
+      -- Portable resolution so this works on any teammate's Mac:
+      --   • binary: $C3LSP_BIN if set, else the conventional clone location.
+      --     Build it once with the bootstrap script (see repo bin/bootstrap-macos.sh)
+      --     or: git clone https://github.com/Andyroid0/c3-lsp ~/repositories/c3-lsp
+      --         && cd ~/repositories/c3-lsp && make build
+      --   • c3c: found on PATH (the actual compiler *binary*, not a dir) so that
+      --     version detection and `c3c build --lsp` diagnostics work.
+      local c3lsp_bin = vim.env.C3LSP_BIN or vim.fn.expand '~/repositories/c3-lsp/server/bin/c3lsp'
+      local c3c_bin = vim.fn.exepath 'c3c' -- '' if c3c isn't on PATH
+
+      if vim.fn.executable(c3lsp_bin) == 1 then
+        local cmd = { c3lsp_bin }
+        if c3c_bin ~= '' then
+          vim.list_extend(cmd, { '-c3c-path', c3c_bin })
+        end
+        vim.lsp.config('c3_lsp', {
+          cmd = cmd,
+          capabilities = capabilities,
+        })
+        vim.lsp.enable 'c3_lsp'
+      else
+        vim.notify(
+          '[c3_lsp] local binary not found at ' .. c3lsp_bin .. '\nRun the c3-lsp bootstrap script (or `make build` in the clone) to enable C3 LSP.',
+          vim.log.levels.WARN
+        )
+      end
+      -- ── END TEMPORARY c3-lsp OVERRIDE ──────────────────────────────────────
     end,
   },
 
@@ -1013,6 +1065,10 @@ require('lazy').setup({
         'c',
         'diff',
         'html',
+        'javascript',
+        'typescript',
+        'jsx',
+        'tsx',
         'lua',
         'luadoc',
         'markdown',
@@ -1023,6 +1079,7 @@ require('lazy').setup({
         'toml',
         'json',
         'pkl',
+        'c3',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
@@ -1035,6 +1092,7 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
+
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
@@ -1125,6 +1183,9 @@ require('lazy').setup({
       config = function()
         require('better-type-hover').setup()
       end,
+    },
+    {
+      'https://github.com/code5717/c3.vim',
     },
   },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the

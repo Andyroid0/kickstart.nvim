@@ -181,6 +181,11 @@ vim.opt.expandtab = true -- Use spaces instead of a tab character when pressing 
 vim.opt.autoindent = true -- Enable auto-indentation
 vim.opt.smartindent = true -- Smarter indentation for new lines
 
+-- Load project-local `.nvim.lua` (used by e.g. luau-lsp.nvim for per-project
+-- type definitions). Neovim asks once per file before trusting it.
+-- See `:help 'exrc'`
+vim.o.exrc = true
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -520,6 +525,10 @@ require('lazy').setup({
 
       -- Allows extra capabilities provided by blink.cmp
       'saghen/blink.cmp',
+
+      -- Fixes omnisharp's go-to-definition/references so they work with
+      -- decompiled/external code instead of erroring out.
+      'Hoffs/omnisharp-extended-lsp.nvim',
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -731,6 +740,8 @@ require('lazy').setup({
           },
         },
 
+        nimls = {},
+
         zls = {},
 
         rust_analyzer = {
@@ -738,6 +749,26 @@ require('lazy').setup({
             ['rust-analyzer'] = {
               cargo = { allFeatures = true },
               procMacro = { enable = true },
+            },
+          },
+        },
+
+        omnisharp = {
+          settings = {
+            FormattingOptions = {
+              EnableEditorConfigSupport = true,
+              OrganizeImports = true,
+            },
+            MsBuild = {
+              LoadProjectsOnDemand = false,
+            },
+            RoslynExtensionsOptions = {
+              EnableAnalyzersSupport = true,
+              EnableImportCompletion = true,
+              AnalyzeOpenDocumentsOnly = false,
+            },
+            Sdk = {
+              IncludePrereleases = true,
             },
           },
         },
@@ -761,12 +792,17 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'rust_analyzer',
         'codelldb',
+        'nimlsp',
+        'luau-lsp', -- Server binary for the luau-lsp.nvim plugin below
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
+        -- luau-lsp.nvim starts and configures the Luau server itself; letting
+        -- mason-lspconfig enable it too would attach a second client.
+        automatic_enable = { exclude = { 'luau_lsp' } },
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -775,6 +811,19 @@ require('lazy').setup({
             -- certain features of an LSP (for example, turning off formatting for ts_ls)
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
+          end,
+          -- omnisharp needs its handlers overridden to properly support
+          -- go-to-definition/references/implementation into decompiled code.
+          ['omnisharp'] = function()
+            local server = servers.omnisharp or {}
+            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+            server.handlers = {
+              ['textDocument/definition'] = require('omnisharp_extended').definition_handler,
+              ['textDocument/typeDefinition'] = require('omnisharp_extended').type_definition_handler,
+              ['textDocument/references'] = require('omnisharp_extended').references_handler,
+              ['textDocument/implementation'] = require('omnisharp_extended').implementation_handler,
+            }
+            require('lspconfig').omnisharp.setup(server)
           end,
         },
       }
@@ -826,6 +875,7 @@ require('lazy').setup({
         jsonc = { 'prettier' },
         rust = { 'rustfmt', lsp_format = 'fallback' },
         zig = { 'zigfmt' },
+        nim = { 'nph' },
       },
     },
   },
@@ -1031,6 +1081,7 @@ require('lazy').setup({
       ensure_installed = {
         'bash',
         'c',
+        'c_sharp',
         'diff',
         'html',
         'javascript',
@@ -1041,6 +1092,7 @@ require('lazy').setup({
         'luadoc',
         'markdown',
         'markdown_inline',
+        'nim',
         'query',
         'rust',
         'vim',
@@ -1151,6 +1203,27 @@ require('lazy').setup({
       ft = { 'typescript', 'typescriptreact' },
       config = function()
         require('better-type-hover').setup()
+      end,
+    },
+    {
+      'alaviss/nim.nvim',
+    },
+    {
+      'lopi-py/luau-lsp.nvim',
+      opts = {
+        platform = {
+          type = 'standard',
+        },
+        sourcemap = {
+          enabled = false,
+        },
+      },
+    },
+    {
+      'GustavEikaas/easy-dotnet.nvim',
+      dependencies = { 'nvim-lua/plenary.nvim', 'folke/snacks.nvim' },
+      config = function()
+        require('easy-dotnet').setup()
       end,
     },
   },

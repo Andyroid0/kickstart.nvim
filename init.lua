@@ -1147,8 +1147,8 @@ require('lazy').setup({
       -- Configure pkl-lsp
       vim.g.pkl_neovim = {
         -- start_command = { 'java', '-jar', '/path/to/pkl-lsp.jar' },
-        -- or if pkl-lsp is installed with brew:
-        start_command = { '/opt/homebrew/bin/pkl-lsp' },
+        -- resolve pkl-lsp from PATH so this works on macOS (brew) and Linux
+        start_command = { vim.fn.exepath 'pkl-lsp' ~= '' and vim.fn.exepath 'pkl-lsp' or '/opt/homebrew/bin/pkl-lsp' },
         pkl_cli_path = '~/pkl',
       }
     end,

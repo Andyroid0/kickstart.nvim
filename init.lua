@@ -709,6 +709,7 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        angularls = {},
         clangd = {},
         gopls = {},
         -- pyright = {},
@@ -739,8 +740,6 @@ require('lazy').setup({
             codelens = { enable = true },
           },
         },
-
-        nimls = {},
 
         zls = {},
 
@@ -792,7 +791,6 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'rust_analyzer',
         'codelldb',
-        'nimlsp',
         'luau-lsp', -- Server binary for the luau-lsp.nvim plugin below
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -875,7 +873,6 @@ require('lazy').setup({
         jsonc = { 'prettier' },
         rust = { 'rustfmt', lsp_format = 'fallback' },
         zig = { 'zigfmt' },
-        nim = { 'nph' },
       },
     },
   },
@@ -1073,9 +1070,10 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'master',
     lazy = false,
     build = ':TSUpdate',
-    main = 'nvim-treesitter.config', -- Sets main module to use for opts
+    main = 'nvim-treesitter.configs', -- Legacy (master-branch) setup module
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       ensure_installed = {
@@ -1086,20 +1084,17 @@ require('lazy').setup({
         'html',
         'javascript',
         'typescript',
-        'jsx',
         'tsx',
         'lua',
         'luadoc',
         'markdown',
         'markdown_inline',
-        'nim',
         'query',
         'rust',
         'vim',
         'vimdoc',
         'toml',
         'json',
-        'pkl',
         'zig',
       },
       -- Autoinstall languages that are not installed
@@ -1206,9 +1201,6 @@ require('lazy').setup({
       end,
     },
     {
-      'alaviss/nim.nvim',
-    },
-    {
       'lopi-py/luau-lsp.nvim',
       opts = {
         platform = {
@@ -1225,6 +1217,9 @@ require('lazy').setup({
       config = function()
         require('easy-dotnet').setup()
       end,
+    },
+    {
+      'https://github.com/github/copilot.vim',
     },
   },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
